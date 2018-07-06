@@ -4,7 +4,7 @@ import matplotlib.pyplot as mplot
 def draw(num):
     color = -1;
     roll = np.random.rand(1);
-    if (roll < (1)):
+    if (roll < (2/3)):
         color = 1
     num = num + (color * np.random.randint(1, 10));
     return num
@@ -25,11 +25,6 @@ def environment(s, a):
         if (sp[0] < 1 or sp[0] > 21):
             r = -1
             game_over = 1
-            while (sp[1] < 17 and sp[1] > 0):
-                sp[1] = draw(sp[1])
-            if (sp[1] > 21 or sp[1] < 1):
-                r = 0
-                return sp, r, game_over
             return sp, r, game_over
     if (a):
         game_over = 1
@@ -44,28 +39,26 @@ def environment(s, a):
             r = 1;
     return sp, r, game_over
 
+# Trains the GLIE Model-Free Controller
+
 # Creates look-up table model defaults
 NSA = np.zeros((2,21,10))
 QSA = np.zeros((2,21,10))
 pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
 
-while(gameCounter < 500000):
+while(gameCounter < 1000000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
     # Experience step (Plays through an episode)
-    #print("playing")
     while(not game_over):
         policy_action = pi[s[0] - 1][s[1] - 1]
         sp, r, game_over = environment(s, policy_action)
         episodes.append(([s[0],s[1]], policy_action, r))
-        s = sp
+        s = list(sp)
     gameCounter += 1
-    wins = wins + (r > 0)
-    losses = losses + (r < 0)
     # Learning step
-    #print("learning from game")
     for i in range(0,len(episodes)):
         s = episodes[i][0]
         a = episodes[i][1]
@@ -83,11 +76,13 @@ while(gameCounter < 500000):
             pi[player_state][dealer_state] = np.argmax([QSA[0][player_state][dealer_state],QSA[1][player_state][dealer_state]])
 
 
+# Tests the GLIE Model-Free Controller
+
 wins = 0
 losses = 0
 gameTestCounter = 0
 
-while(gameTestCounter < 1000):
+while(gameTestCounter < 50000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
@@ -97,13 +92,13 @@ while(gameTestCounter < 1000):
         policy_action = pi[s[0] - 1][s[1] - 1]
         sp, r, game_over = environment(s, policy_action)
         episodes.append(([s[0],s[1]], policy_action, r))
-        s = sp
+        s = list(sp)
     gameTestCounter += 1
     wins = wins + (r > 0)
     losses = losses + (r < 0)
 winRatio = wins/gameTestCounter
 lossRatio = losses/gameTestCounter
-#mplot.contour(NSA)
-#mplot.show()
+mplot.contour(pi)
+mplot.show()
 
 
