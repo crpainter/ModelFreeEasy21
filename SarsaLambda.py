@@ -9,9 +9,9 @@ NSA = np.zeros((2,31,27))
 QSA = np.zeros((2,31,27))
 pi = np.zeros((31,27), dtype=int)
 gameCounter = 0
-lamb = 0
+lamb = 0.7
 
-while(gameCounter < 50000):
+while(gameCounter < 100000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
@@ -33,12 +33,13 @@ while(gameCounter < 50000):
         alpha = (1 / (NSA[a][player_state][dealer_state]))
         ap = pi[sp[0] - 1][sp[1] - 1]
         delta = r + QSA[ap][sp[0] - 1][sp[1] - 1] - SA_pair_val
-        for inc_act in range (0,2):
-            for inc_s0 in range (0,31):
-                for inc_s1 in range(0, 27):
-                    QSA[inc_act][inc_s0][inc_s1] = QSA[inc_act][inc_s0][inc_s1] + alpha*delta*ESA[inc_act][inc_s0][inc_s1]
-                    ESA[inc_act][inc_s0][inc_s1] = lamb*ESA[inc_act][inc_s0][inc_s1]
-
+        #for inc_act in range (0,2):
+            #for inc_s0 in range (0,31):
+                #for inc_s1 in range(0, 27):
+                    #QSA[inc_act][inc_s0][inc_s1] = QSA[inc_act][inc_s0][inc_s1] + alpha*delta*ESA[inc_act][inc_s0][inc_s1]
+                    #ESA[inc_act][inc_s0][inc_s1] = lamb*ESA[inc_act][inc_s0][inc_s1]
+        QSA = QSA + alpha * delta * ESA
+        ESA = lamb * ESA
         # Updating the policy table epsilon greedily
         e = 100 / (100 + NSA[0][player_state][dealer_state] + NSA[1][player_state][dealer_state])
         if (e >= np.random.rand(1)):

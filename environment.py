@@ -3,7 +3,7 @@ import numpy as np
 def draw(num):
     color = -1;
     roll = np.random.rand(1);
-    if (roll < (1)):
+    if (roll < (2/3)):
         color = 1
     num = num + (color * np.random.randint(1, 10));
     return num

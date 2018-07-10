@@ -10,7 +10,7 @@ QSA = np.zeros((2,21,10))
 pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
 
-while(gameCounter < 500000):
+while(gameCounter < 100000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
