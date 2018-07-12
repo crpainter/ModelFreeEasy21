@@ -5,17 +5,17 @@ import matplotlib.pyplot as mplot
 # Trains the Sarsa Lambda Model-Free Controller
 
 # Creates look-up table model defaults
-NSA = np.zeros((2,31,27))
-QSA = np.zeros((2,31,27))
-pi = np.zeros((31,27), dtype=int)
+NSA = np.zeros((2,21,10))
+QSA = np.zeros((2,21,10))
+pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
-lamb = 0.7
+lamb = 0
 
-while(gameCounter < 100000):
+while(gameCounter < 100):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
-    ESA = np.zeros((2, 31, 27))
+    ESA = np.zeros((2, 21, 10))
     # Experience step (Plays through an episode)
     while(not game_over):
 
@@ -31,8 +31,12 @@ while(gameCounter < 100000):
         ESA[a][player_state][dealer_state] = ESA[a][player_state][dealer_state] + 1
         SA_pair_val = QSA[a][player_state][dealer_state]
         alpha = (1 / (NSA[a][player_state][dealer_state]))
-        ap = pi[sp[0] - 1][sp[1] - 1]
-        delta = r + QSA[ap][sp[0] - 1][sp[1] - 1] - SA_pair_val
+        #ap = pi[sp[0] - 1][sp[1] - 1]
+        if (game_over):
+            delta = r - SA_pair_val
+        else:
+            ap = np.argmax([QSA[0][sp[0] - 1][sp[1] - 1], QSA[1][sp[0] - 1][sp[1] - 1]])
+            delta = r + QSA[ap][sp[0] - 1][sp[1] - 1] - SA_pair_val
         #for inc_act in range (0,2):
             #for inc_s0 in range (0,31):
                 #for inc_s1 in range(0, 27):
@@ -71,5 +75,10 @@ while(gameTestCounter < 50000):
     losses = losses + (r < 0)
 winRatio = wins/gameTestCounter
 lossRatio = losses/gameTestCounter
+QSA_Sarsa = np.copy(QSA)
 mplot.contour(pi)
 mplot.show()
+
+# QDiff = QSA_GLIE - QSA_Sarsa
+# QDSquare = np.square(QDiff)
+# QMean = np.mean(QDSquare)

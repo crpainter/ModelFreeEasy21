@@ -10,28 +10,31 @@ QSA = np.zeros((2,21,10))
 pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
 
-while(gameCounter < 100000):
+while(gameCounter < 1000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
+    rtotal = 0
     # Experience step (Plays through an episode)
     while(not game_over):
         policy_action = pi[s[0] - 1][s[1] - 1]
         sp, r, game_over = environment(s, policy_action)
         episodes.append(([s[0],s[1]], policy_action, r))
         s = list(sp)
+        rtotal += r
     gameCounter += 1
     # Learning step
     for i in range(0,len(episodes)):
         s = episodes[i][0]
         a = episodes[i][1]
-        r = episodes[i][2]
+        # Commenting this line out because I think it makes the difference in this code executing single step Sarsa vs. MonteCarlo control
+        # r = episodes[i][2]
         player_state = s[0] - 1
         dealer_state = s[1] - 1
         NSA[a][player_state][dealer_state] = NSA[a][player_state][dealer_state] + 1
         SA_pair_val = QSA[a][player_state][dealer_state]
         alpha = (1/(NSA[a][player_state][dealer_state]))
-        QSA[a][player_state][dealer_state] = SA_pair_val + alpha * (r - SA_pair_val)
+        QSA[a][player_state][dealer_state] = SA_pair_val + alpha * (rtotal - SA_pair_val)
         e = 100 / (100 + NSA[0][player_state][dealer_state] + NSA[1][player_state][dealer_state])
         if (e >= np.random.rand(1)):
             pi[player_state][dealer_state] = np.random.randint(0, 2)
@@ -61,5 +64,6 @@ while(gameTestCounter < 50000):
     losses = losses + (r < 0)
 winRatio = wins/gameTestCounter
 lossRatio = losses/gameTestCounter
+QSA_GLIE = np.copy(QSA)
 mplot.contour(pi)
 mplot.show()
