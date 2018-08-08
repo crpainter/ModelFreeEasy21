@@ -3,7 +3,7 @@ import numpy as np
 def draw(num):
     color = -1;
     roll = np.random.rand(1);
-    if (roll < (2/3)):
+    if (roll < (1)):
         color = 1
     num = num + (color * np.random.randint(1, 10));
     return num
@@ -23,6 +23,12 @@ def environment(s, a):
         sp[0] = draw(s[0])
         if (sp[0] < 1 or sp[0] > 21):
             r = -1
+            # Uncomment this section to give the player a chance of tieing if the dealer folds
+            while (sp[1] < 17 and sp[1] > 0):
+                sp[1] = draw(sp[1]);
+            if (sp[1] > 21 or sp[1] < 1):
+                r = 0;
+            # # #
             game_over = 1
             return sp, r, game_over
     if (a):

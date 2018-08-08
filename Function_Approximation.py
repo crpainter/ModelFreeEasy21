@@ -6,18 +6,16 @@ import matplotlib.pyplot as mplot
 # Trains the Sarsa Lambda Model-Free Controller
 
 # Creates look-up table model defaults
-NSA = np.zeros((2,21,10))
-QSA = np.zeros((2,21,10))
 pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
-lamb = 0
+lamb = 1
 theta = np.zeros((36))
 
-while(gameCounter < 100):
+while(gameCounter < 500000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
-    ESA = np.zeros((2, 21, 10))
+    ESA = np.zeros((36))
     # Experience step (Plays through an episode)
     while(not game_over):
 
@@ -26,28 +24,26 @@ while(gameCounter < 100):
         sp, r, game_over = environment(s, policy_action)
 
         # Sarsa updates after each turn
-        player_state = s[0] - 1
-        dealer_state = s[1] - 1
+        player_state = s[0]
+        dealer_state = s[1]
         a = policy_action
-        NSA[a][player_state][dealer_state] = NSA[a][player_state][dealer_state] + 1
-        ESA[a][player_state][dealer_state] = ESA[a][player_state][dealer_state] + 1
+        ESA = ESA + state_vec(player_state,dealer_state,a)
         SA_pair_val = np.multiply(np.transpose(state_vec(player_state,dealer_state,a)),theta)
 
         alpha = 0.01
-        ap = pi[sp[0] - 1][sp[1] - 1]
         if (game_over):
             delta = r - SA_pair_val
         else:
-            #ap = np.argmax([QSA[0][sp[0] - 1][sp[1] - 1], QSA[1][sp[0] - 1][sp[1] - 1]])
-            delta = r + QSA[ap][sp[0] - 1][sp[1] - 1] - SA_pair_val
-        QSA = QSA + alpha * delta * ESA
+            next_state_val = np.argmax([np.multiply(np.transpose(state_vec(sp[0],sp[1],0)),theta),np.multiply(np.transpose(state_vec(sp[0],sp[1],1)),theta)])
+            delta = r + next_state_val - SA_pair_val
+        theta = theta + alpha * delta * ESA
         ESA = lamb * ESA
         # Updating the policy table epsilon greedily
         e = 0.05
         if (e >= np.random.rand(1)):
-            pi[player_state][dealer_state] = np.random.randint(0, 2)
+            pi[player_state - 1][dealer_state - 1] = np.random.randint(0, 2)
         else:
-            pi[player_state][dealer_state] = np.argmax([QSA[0][player_state][dealer_state],QSA[1][player_state][dealer_state]])
+            pi[player_state - 1][dealer_state - 1] = np.argmax([np.multiply(np.transpose(state_vec(player_state,dealer_state,0)),theta), np.multiply(np.transpose(state_vec(player_state,dealer_state,1)),theta)])
 
         s = list(sp)
     gameCounter += 1
@@ -73,7 +69,6 @@ while(gameTestCounter < 50000):
     losses = losses + (r < 0)
 winRatio = wins/gameTestCounter
 lossRatio = losses/gameTestCounter
-QSA_Sarsa = np.copy(QSA)
 mplot.contour(pi)
 mplot.show()
 

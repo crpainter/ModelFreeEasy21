@@ -9,9 +9,9 @@ NSA = np.zeros((2,21,10))
 QSA = np.zeros((2,21,10))
 pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
-lamb = 0
+lamb = 1
 
-while(gameCounter < 100):
+while(gameCounter < 50000):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
@@ -60,7 +60,7 @@ wins = 0
 losses = 0
 gameTestCounter = 0
 
-while(gameTestCounter < 50000):
+while(gameTestCounter < 500):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
@@ -79,6 +79,6 @@ QSA_Sarsa = np.copy(QSA)
 mplot.contour(pi)
 mplot.show()
 
-# QDiff = QSA_GLIE - QSA_Sarsa
-# QDSquare = np.square(QDiff)
-# QMean = np.mean(QDSquare)
+QDiff = QSA_GLIE - QSA_Sarsa
+QDSquare = np.square(QDiff)
+QMean = np.mean(QDSquare)
