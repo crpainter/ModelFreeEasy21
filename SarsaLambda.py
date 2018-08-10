@@ -11,7 +11,7 @@ pi = np.zeros((21,10), dtype=int)
 gameCounter = 0
 lamb = 1
 
-while(gameCounter < 50000):
+while(gameCounter < 500):
     # Initializes game
     s, r, game_over = environment([], 0)
     episodes = []
